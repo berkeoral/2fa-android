@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">2phase_auth</string>
-    <string name="instructions">
-        Place your fingertip on the Home button to verify your identity
-    </string>
+    <string name="loginscreen_login_button">Login</string>
+    <string name="loginscreen_signup_button">Signup</string>
+    <string name="loginscreen_id_hint">ID</string>
+    <string name="loginscreen_password_hint">Password</string>
+    <string name="title_activity_secret">SecretActivity</string>
+
 </resources>
