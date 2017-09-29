@@ -2,6 +2,7 @@ package com.group11.blg439e.a2phase_auth;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
 public class SecretActivity extends AppCompatActivity {
 
@@ -10,4 +11,5 @@ public class SecretActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_secret);
     }
+
 }

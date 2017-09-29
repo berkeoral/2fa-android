@@ -15,25 +15,27 @@
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
             android:layout_alignParentStart="true">
-        <TextView
+        <EditText
                 android:text="@string/loginscreen_id_hint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/loginScreenIdTextView"/>
-        <TextView
+                android:id="@+id/loginScreenIdEditText"/>
+        <EditText
                 android:text="@string/loginscreen_password_hint"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/loginScreenPasswordTextView"/>
+                android:id="@+id/loginScreenPasswordEditText"/>
         <Button
                 android:text="@string/loginscreen_login_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/loginScreenLoginButton"/>
+                android:id="@+id/loginScreenLoginButton"
+                android:onClick="loginButton"/>
         <Button
                 android:text="@string/loginscreen_signup_button"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/loginScreenSignupButton"/>
+                android:id="@+id/loginScreenSignupButton"
+                android:onClick="signupButton"/>
     </LinearLayout>
 </RelativeLayout>
