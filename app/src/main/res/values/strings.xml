@@ -5,5 +5,12 @@
     <string name="loginscreen_id_hint">ID</string>
     <string name="loginscreen_password_hint">Password</string>
     <string name="title_activity_secret">SecretActivity</string>
+    <string name="toast_loginscreen_signup_idexist">Username already been taken</string>
+    <string name="toast_loginscreen_signup_accountcreated">Account created</string>
+    <string name="toast_loginscreen_emptyfields">Empty Fields</string>
+    <string name="toast_loginscreen_login_error">Username or password is wrong</string>
+
+
+
 
 </resources>
