@@ -21,6 +21,8 @@
         </activity>
         <activity android:name=".SecretActivity">
         </activity>
+        <activity android:name=".FaceRecognitionActivity">
+        </activity>
     </application>
 
 </manifest>

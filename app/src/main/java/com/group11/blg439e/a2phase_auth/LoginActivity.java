@@ -3,17 +3,22 @@ package com.group11.blg439e.a2phase_auth;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.hardware.fingerprint.FingerprintManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import javax.crypto.Cipher;
+
 public class LoginActivity extends AppCompatActivity {
 
     private EditText idEditText;
     private EditText passwordEditText;
     private AccountSQLHelper dbHelper;
+    private FingerprintManager fpManager;
+    private Cipher cipher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,8 +55,9 @@ public class LoginActivity extends AppCompatActivity {
         if(cursor.moveToNext()){
             String password = cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_PASSWORD));
             if(password.equals(passwordEditText.getText().toString())){
+
                 startActivityForResult(SecretActivity.getIntent(this,
-                        cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT))),1);
+                        cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT))), 1);
             }
             else{
                 Toast.makeText(this, getString(R.string.toast_loginscreen_login_error),

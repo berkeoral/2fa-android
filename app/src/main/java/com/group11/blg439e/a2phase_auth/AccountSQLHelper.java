@@ -4,9 +4,6 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
-/**
- * Created by berke on 9/29/2017.
- */
 public class AccountSQLHelper extends SQLiteOpenHelper {
 
     private static final String SQL_CREATE_TABLE =
