@@ -1,9 +1,13 @@
 package com.group11.blg439e.a2phase_auth;
 
+import android.Manifest;
 import android.content.ContentValues;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.fingerprint.FingerprintManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -20,17 +24,41 @@ public class LoginActivity extends AppCompatActivity {
     private FingerprintManager fpManager;
     private Cipher cipher;
 
+    private static final int PERMISSIONS_REQUEST_FINGER_PRINT = 0;
+    private static final int PERMISSIONS_REQUEST_CAMERA = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         idEditText = (EditText) findViewById(R.id.loginScreenIdEditText);
-        passwordEditText = (EditText)findViewById(R.id.loginScreenPasswordEditText);
+        passwordEditText = (EditText) findViewById(R.id.loginScreenPasswordEditText);
         dbHelper = new AccountSQLHelper(this); // ??? which context is neeeded?
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_CAMERA: {
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    startActivityForResult(FaceRecognitionActivity.getIntent(this, true), 1);
+                } else {
+                    Toast.makeText(this, getString(R.string.toast_loginscreen_permission_denied),
+                            Toast.LENGTH_LONG).show();
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
+    }
+
+
     public void loginButton(View view) {
-        if(isFieldsEmpty()){
+        if (isFieldsEmpty()) {
             Toast.makeText(this, getString(R.string.toast_loginscreen_emptyfields),
                     Toast.LENGTH_LONG).show();
             return;
@@ -43,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
                 AccountContract.Account.COLUMN_NAME_CONTENT
         };
         String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
-        String[] selectionArgs = { idEditText.getText().toString() };
+        String[] selectionArgs = {idEditText.getText().toString()};
         Cursor cursor = db.query(AccountContract.Account.TABLE_NAME,
                 projection,
                 selection,
@@ -52,26 +80,33 @@ public class LoginActivity extends AppCompatActivity {
                 null,
                 null
         );
-        if(cursor.moveToNext()){
+        if (cursor.moveToNext()) {
             String password = cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_PASSWORD));
-            if(password.equals(passwordEditText.getText().toString())){
+            if (password.equals(passwordEditText.getText().toString())) {
 
-                startActivityForResult(SecretActivity.getIntent(this,
-                        cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT))), 1);
-            }
-            else{
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this,
+                            new String[]{Manifest.permission.CAMERA},
+                            PERMISSIONS_REQUEST_CAMERA
+                    );
+                } else {
+                    startActivityForResult(FaceRecognitionActivity.getIntent(this, true), 1);
+                    //startActivityForResult(SecretActivity.getIntent(this,
+                    //cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT))), 1);
+                }
+            } else {
                 Toast.makeText(this, getString(R.string.toast_loginscreen_login_error),
                         Toast.LENGTH_LONG).show();
             }
-        }
-        else{
+        } else {
             Toast.makeText(this, getString(R.string.toast_loginscreen_login_error),
                     Toast.LENGTH_LONG).show();
         }
     }
 
-    public void signupButton(View view){
-        if(isFieldsEmpty()){
+    public void signupButton(View view) {
+        if (isFieldsEmpty()) {
             Toast.makeText(this, getString(R.string.toast_loginscreen_emptyfields),
                     Toast.LENGTH_LONG).show();
             return;
@@ -84,7 +119,7 @@ public class LoginActivity extends AppCompatActivity {
                 AccountContract.Account.COLUMN_NAME_CONTENT
         };
         String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
-        String[] selectionArgs = { idEditText.getText().toString() };
+        String[] selectionArgs = {idEditText.getText().toString()};
         Cursor cursor = db.query(AccountContract.Account.TABLE_NAME,
                 projection,
                 selection,
@@ -92,8 +127,8 @@ public class LoginActivity extends AppCompatActivity {
                 null,
                 null,
                 null
-                );
-        if(cursor.moveToNext()){
+        );
+        if (cursor.moveToNext()) {
             Toast.makeText(this, getString(R.string.toast_loginscreen_signup_idexist),
                     Toast.LENGTH_LONG).show();
             cursor.close();
@@ -104,15 +139,15 @@ public class LoginActivity extends AppCompatActivity {
         values.put(AccountContract.Account.COLUMN_NAME_ID, idEditText.getText().toString());
         values.put(AccountContract.Account.COLUMN_NAME_PASSWORD, passwordEditText.getText().toString());
         values.put(AccountContract.Account.COLUMN_NAME_CONTENT, "");
-        db.insert(AccountContract.Account.TABLE_NAME,null, values);
+        db.insert(AccountContract.Account.TABLE_NAME, null, values);
         Toast.makeText(this, getString(R.string.toast_loginscreen_signup_accountcreated),
                 Toast.LENGTH_LONG).show();
         cursor.close();
         return;
     }
 
-    private boolean isFieldsEmpty(){
-        if(idEditText.getText().toString().equals("") || passwordEditText.getText().toString().equals("")){
+    private boolean isFieldsEmpty() {
+        if (idEditText.getText().toString().equals("") || passwordEditText.getText().toString().equals("")) {
             return true;
         }
         return false;
