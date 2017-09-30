@@ -10,8 +10,9 @@
     <string name="toast_loginscreen_emptyfields">Empty Fields</string>
     <string name="toast_loginscreen_login_error">Username or password is wrong</string>
     <string name="toast_loginscreen_permission_denied">Permission denied, Application can\'t reach camera</string>
-    <string name="gfycat_client_id">izukoi</string>
-    <string name="gfycat_client_secret">123456</string>
+    <string name="teknik_client_id">izukoi</string>
+    <string name="teknik_client_password">123456</string>
+    <string name="teknik_url_base">https://api.teknik.io/v1</string>
 
 
 </resources>
