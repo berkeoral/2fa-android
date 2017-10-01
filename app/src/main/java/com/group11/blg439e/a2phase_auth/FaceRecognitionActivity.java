@@ -11,6 +11,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ImageView;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.http.Multipart;
 
 import java.io.File;
 import java.io.IOException;
@@ -25,6 +36,10 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     private ImageView debugIV; //DEBUG
     private String currentPhotoPath;
     private Uri photoURI;
+    private Uri photoWebURI;
+    private Retrofit retrofit;
+    private Gson gson;
+    //private TeknikUploadService teknikUploadService;
 
     public static Intent getIntent(Context context, Boolean verify){
         Intent intent = new Intent(context, FaceRecognitionActivity.class);
@@ -38,6 +53,14 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         setContentView(R.layout.activity_face_recognition);
         debugIV = (ImageView)findViewById(R.id.faceRecognitionDebugImageView);
         dispatchTakePictureIntent();
+        gson = new GsonBuilder()
+                .setLenient()
+                .create();
+        retrofit = new Retrofit.Builder()
+                .baseUrl(getString(R.string.teknik_url_base))
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        //teknikUploadService = retrofit.create(TeknikUploadService.class);
     }
 
 
@@ -45,9 +68,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            debugIV.setImageBitmap(imageBitmap);
+            File file = new File(photoURI.getPath());
         }
     }
 
