@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Created by berke on 10/1/2017.
  */
-public class KairosEnrollResponse
+public class KairosResponse
 {
     private String face_id;
 
@@ -46,6 +46,6 @@ public class KairosEnrollResponse
     @Override
     public String toString()
     {
-        return "KairosEnrollResponse [face_id = "+face_id+", images = "+images+", Errors = "+Errors+"]";
+        return "KairosResponse [face_id = "+face_id+", images = "+images+", Errors = "+Errors+"]";
     }
 }

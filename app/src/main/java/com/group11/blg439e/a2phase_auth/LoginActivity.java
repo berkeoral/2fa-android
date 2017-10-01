@@ -2,6 +2,8 @@ package com.group11.blg439e.a2phase_auth;
 
 import android.Manifest;
 import android.content.ContentValues;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -18,14 +20,16 @@ import javax.crypto.Cipher;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static AccountSQLHelper dbHelper;
     private EditText idEditText;
     private EditText passwordEditText;
-    private AccountSQLHelper dbHelper;
     private FingerprintManager fpManager;
     private Cipher cipher;
 
     private static final int PERMISSIONS_REQUEST_FINGER_PRINT = 0;
     private static final int PERMISSIONS_REQUEST_CAMERA = 1;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,7 +37,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         idEditText = (EditText) findViewById(R.id.loginScreenIdEditText);
         passwordEditText = (EditText) findViewById(R.id.loginScreenPasswordEditText);
-        dbHelper = new AccountSQLHelper(this); // ??? which context is neeeded?
+        dbHelper = new AccountSQLHelper(this);
     }
 
     @Override
@@ -43,6 +47,10 @@ public class LoginActivity extends AppCompatActivity {
             case PERMISSIONS_REQUEST_CAMERA: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString(getString(R.string.shared_preferences_userid), idEditText.getText().toString());
+                    editor.commit();
                     startActivityForResult(FaceRecognitionActivity.getIntent(this, true), 1);
                 } else {
                     Toast.makeText(this, getString(R.string.toast_loginscreen_permission_denied),
@@ -50,9 +58,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
                 return;
             }
-
-            // other 'case' lines to check for other
-            // permissions this app might request
         }
     }
 
@@ -91,6 +96,10 @@ public class LoginActivity extends AppCompatActivity {
                             PERMISSIONS_REQUEST_CAMERA
                     );
                 } else {
+                    SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = prefs.edit();
+                    editor.putString(getString(R.string.shared_preferences_userid), idEditText.getText().toString());
+                    editor.commit();
                     startActivityForResult(FaceRecognitionActivity.getIntent(this, true), 1);
                     //startActivityForResult(SecretActivity.getIntent(this,
                     //cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT))), 1);
@@ -151,6 +160,14 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+    public static SQLiteDatabase getReadableDB(){
+        return dbHelper.getReadableDatabase();
+    }
+
+    public static SQLiteDatabase getWritableDB(){
+        return dbHelper.getWritableDatabase();
     }
 
 }
