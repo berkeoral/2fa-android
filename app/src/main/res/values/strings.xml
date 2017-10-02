@@ -11,14 +11,15 @@
     <string name="toast_loginscreen_login_error">Username or password is wrong</string>
     <string name="toast_loginscreen_permission_denied">Permission denied, Application can\'t reach camera</string>
     <string name="toast_facerecognition_nomatch">Not recognized</string>
-    <string name="toast_facerecognition_error">No connection</string>
-    <string name="toast_facerecognition_error_poorphoto">Poor photo quality</string>
+    <string name="toast_facerecognition_error_connection">No connection</string>
+    <string name="toast_facerecognition_error_poorquality">Poor photo quality</string>
     <string name="toast_facerecognition_error_noface">No face detected</string>
     <string name="karios_app_id">00055402</string>
     <string name="karios_app_key">5dec9d86906c619672f7ce6b264f98fc</string>
     <string name="kairos_url_base">https://api.kairos.com/</string>
     <string name="shared_preferences_filename">prefs</string>
     <string name="shared_preferences_userid">id</string>
+    <string name="forresult_intent_responsecode">responsecode</string>
 
 
 </resources>

@@ -3,8 +3,9 @@ package com.group11.blg439e.a2phase_auth;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -27,16 +28,18 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 public class FaceRecognitionActivity extends AppCompatActivity {
 
-    private static Context context;
-    private static SQLiteDatabase db;
+
     private static final int REQUEST_TAKE_PHOTO = 1;
+    private static final int PHOTO_COMPRESS_QUALITY = 50;
     private static final String INTENT_ACTIVITY_PURPOSE = "purpose";
     private Boolean verify;
     private String currentPhotoPath;
@@ -50,10 +53,6 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         Intent intent = new Intent(context, FaceRecognitionActivity.class);
         intent.putExtra(INTENT_ACTIVITY_PURPOSE, verify);
         return intent;
-    }
-
-    public static Context getContext(){
-        return FaceRecognitionActivity.context;
     }
 
     @Override
@@ -79,11 +78,28 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         dispatchTakePictureIntent();
     }
 
-
-
+    /*
+    *From file path obtains bitmap and compresses it
+    * Makes API call sending compressed image file
+    * >If verify flag is true makes api call for verifying user
+    * >else makes api call for enrolling user
+    * Returns int code to LoginActivity
+    * >int code represents servers response
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            try {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, options);
+                OutputStream fOut = new FileOutputStream(new File(currentPhotoPath));
+                bitmap.compress(Bitmap.CompressFormat.JPEG, PHOTO_COMPRESS_QUALITY, fOut);
+                fOut.close();
+            }
+            catch (Exception e){
+                Log.d("Exception: ", "Failed to compress file");
+            }
             File file = new File(currentPhotoPath);
             SharedPreferences sharedPreferences = this.getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
             final RequestBody user_id = RequestBody.create(
@@ -103,49 +119,36 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                         dFile.delete();
                         if(response.body().getErrors() == null){
                             if(Double.parseDouble(response.body().getImages()[0].getTransaction().getConfidence()) > 0.5) {
-                                db = LoginActivity.getReadableDB();
-                                String[] projection = {
-                                        AccountContract.Account._ID,
-                                        AccountContract.Account.COLUMN_NAME_ID,
-                                        AccountContract.Account.COLUMN_NAME_PASSWORD,
-                                        AccountContract.Account.COLUMN_NAME_CONTENT
-                                };
-                                String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
-                                String[] selectionArgs = {user_id.toString()}; // check if anything is wrong with user_id
-                                Cursor cursor = db.query(AccountContract.Account.TABLE_NAME,
-                                        projection,
-                                        selection,
-                                        selectionArgs,
-                                        null,
-                                        null,
-                                        null
-                                );
-                                String content = "";
-                                if (cursor.moveToNext()) {
-                                    content = cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT));
-                                }
-                                startActivityForResult(SecretActivity
-                                        .getIntent(FaceRecognitionActivity.getContext(),content), 1);
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                        ,getResources().getInteger(R.integer.facerecog_login_verified));
+                                setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
+                                finish();
                             }
                             else{
-                                Toast.makeText(FaceRecognitionActivity.getContext()
-                                        ,getString(R.string.toast_facerecognition_nomatch)
-                                        ,Toast.LENGTH_LONG).show();
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                        ,getResources().getInteger(R.integer.facerecog_login_error_notrecog));
+                                setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
+                                finish();
                             }
                         }
                         else{
-                            Toast.makeText(FaceRecognitionActivity.getContext()
-                                    ,getString(R.string.toast_facerecognition_nomatch)
-                                    ,Toast.LENGTH_LONG).show();
+                            Intent returnIntent = new Intent();
+                            returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                    ,getResources().getInteger(R.integer.facerecog_login_error_noface));
+                            setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
+                            finish();
                         }
                     }
                     @Override
                     public void onFailure(Call<KairosResponse> call, Throwable t) {
                         File dFile = new File(currentPhotoPath);
                         dFile.delete();
-                        Toast.makeText(FaceRecognitionActivity.getContext()
-                                ,getString(R.string.toast_facerecognition_error)
-                                ,Toast.LENGTH_LONG).show();
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                ,getResources().getInteger(R.integer.facerecog_login_error_connection));
+                        setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
                         finish();
                     }
                 });
@@ -159,27 +162,25 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                         dFile.delete();
                         if(response.body().getErrors() == null){
                             if(Double.parseDouble(response.body().getImages()[0].getTransaction().getConfidence()) > 0.5) {
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                        ,getResources().getInteger(R.integer.facerecog_signup_enrolled));
+                                setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
                                 finish();
                             }
                             else{
-                                Toast.makeText(FaceRecognitionActivity.getContext()
-                                        ,getString(R.string.toast_facerecognition_error_poorphoto)
-                                        ,Toast.LENGTH_LONG).show();
-                                db = LoginActivity.getWritableDB();
-                                db.delete(AccountContract.Account.TABLE_NAME
-                                        , AccountContract.Account.COLUMN_NAME_ID + "=?"
-                                        , new String[]{user_id.toString()});
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                        ,getResources().getInteger(R.integer.facerecog_signup_error_poorquality));
+                                setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
                                 finish();
                             }
                         }
                         else{
-                            Toast.makeText(FaceRecognitionActivity.getContext()
-                                    ,getString(R.string.toast_facerecognition_error_noface)
-                                    ,Toast.LENGTH_LONG).show();
-                            db = LoginActivity.getWritableDB();
-                            db.delete(AccountContract.Account.TABLE_NAME
-                                    , AccountContract.Account.COLUMN_NAME_ID + "=?"
-                                    , new String[]{user_id.toString()});
+                            Intent returnIntent = new Intent();
+                            returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                    ,getResources().getInteger(R.integer.facerecog_signup_error_noface));
+                            setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
                             finish();
                         }
                     }
@@ -187,9 +188,10 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                     public void onFailure(Call<KairosResponse> call, Throwable t) {
                         File dFile = new File(currentPhotoPath);
                         dFile.delete();
-                        Toast.makeText(FaceRecognitionActivity.getContext()
-                                ,getString(R.string.toast_facerecognition_error)
-                                ,Toast.LENGTH_LONG).show();
+                        Intent returnIntent = new Intent();
+                        returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                ,getResources().getInteger(R.integer.facerecog_signup_error_connection));
+                        setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
                         finish();
                     }
                 });

@@ -3,6 +3,7 @@ package com.group11.blg439e.a2phase_auth;
 import android.Manifest;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
@@ -20,14 +21,14 @@ import javax.crypto.Cipher;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private static final int PERMISSIONS_REQUEST_CAMERA = 1;
+    private static final int REQUEST_CODE_FACE_RECOGNITION = 1;
+    private static final int REQUEST_CODE_SECRET_ACTIVITY = 2;
     private static AccountSQLHelper dbHelper;
+    private static Boolean verify = true;
     private EditText idEditText;
     private EditText passwordEditText;
-    private FingerprintManager fpManager;
-    private Cipher cipher;
-
-    private static final int PERMISSIONS_REQUEST_FINGER_PRINT = 0;
-    private static final int PERMISSIONS_REQUEST_CAMERA = 1;
+    private String currentUserId;
 
 
 
@@ -41,8 +42,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
             case PERMISSIONS_REQUEST_CAMERA: {
                 if (grantResults.length > 0
@@ -51,7 +51,14 @@ public class LoginActivity extends AppCompatActivity {
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString(getString(R.string.shared_preferences_userid), idEditText.getText().toString());
                     editor.commit();
-                    startActivityForResult(FaceRecognitionActivity.getIntent(this, true), 1);
+                    currentUserId = idEditText.getText().toString();
+                    if(verify) {
+                        startActivityForResult(FaceRecognitionActivity.getIntent(this, true), REQUEST_CODE_FACE_RECOGNITION);
+                    }
+                    else{
+                        verify = true;
+                        startActivityForResult(FaceRecognitionActivity.getIntent(this, false), REQUEST_CODE_FACE_RECOGNITION);
+                    }
                 } else {
                     Toast.makeText(this, getString(R.string.toast_loginscreen_permission_denied),
                             Toast.LENGTH_LONG).show();
@@ -61,6 +68,86 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_FACE_RECOGNITION) {
+            if (resultCode == getResources().getInteger(R.integer.facerecog_result_code)) {
+                int responsecode = data.getIntExtra(getString(R.string.forresult_intent_responsecode), 0);
+                if(responsecode == getResources().getInteger(R.integer.facerecog_login_verified)){
+                    SQLiteDatabase db = dbHelper.getReadableDatabase();
+                    db = LoginActivity.getReadableDB();
+                    String[] projection = {
+                            AccountContract.Account._ID,
+                            AccountContract.Account.COLUMN_NAME_ID,
+                            AccountContract.Account.COLUMN_NAME_PASSWORD,
+                            AccountContract.Account.COLUMN_NAME_CONTENT
+                    };
+                    String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
+                    String[] selectionArgs = {currentUserId}; // check if anything is wrong with user_id
+                    Cursor cursor = db.query(AccountContract.Account.TABLE_NAME,
+                            projection,
+                            selection,
+                            selectionArgs,
+                            null,
+                            null,
+                            null
+                    );
+                    String content = "";
+                    if (cursor.moveToNext()) {
+                        content = cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT));
+                    }
+                    startActivityForResult(SecretActivity
+                            .getIntent(this,content), 1);
+                }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_login_error_notrecog)){
+                    Toast.makeText(this
+                            ,getString(R.string.toast_facerecognition_nomatch)
+                            ,Toast.LENGTH_LONG).show();
+                    currentUserId ="";
+                }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_login_error_noface)){
+                    Toast.makeText(this
+                            ,getString(R.string.toast_facerecognition_nomatch)
+                            ,Toast.LENGTH_LONG).show();
+                    currentUserId ="";
+                }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_login_error_connection)){
+                    Toast.makeText(this
+                            ,getString(R.string.toast_facerecognition_error_connection)
+                            ,Toast.LENGTH_LONG).show();
+                    currentUserId ="";
+                }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_enrolled)){
+                    SQLiteDatabase db = dbHelper.getWritableDatabase();
+                    ContentValues values = new ContentValues();
+                    values.put(AccountContract.Account.COLUMN_NAME_ID, idEditText.getText().toString());
+                    values.put(AccountContract.Account.COLUMN_NAME_PASSWORD, passwordEditText.getText().toString());
+                    values.put(AccountContract.Account.COLUMN_NAME_CONTENT, "");
+                    db.insert(AccountContract.Account.TABLE_NAME, null, values);
+                    Toast.makeText(this, getString(R.string.toast_loginscreen_signup_accountcreated),
+                            Toast.LENGTH_LONG).show();
+                }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_error_poorquality)){
+                    Toast.makeText(this
+                            ,getString(R.string.toast_facerecognition_error_poorquality)
+                            ,Toast.LENGTH_LONG).show();
+                }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_error_noface)){
+                    Toast.makeText(this
+                            ,getString(R.string.toast_facerecognition_error_noface)
+                            ,Toast.LENGTH_LONG).show();
+                }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_error_connection)){
+                    Toast.makeText(this
+                            ,getString(R.string.toast_facerecognition_error_connection)
+                            ,Toast.LENGTH_LONG).show();
+                }
+            }
+        }
+        else if(requestCode == REQUEST_CODE_SECRET_ACTIVITY){
+            currentUserId ="";
+        }
+    }
 
     public void loginButton(View view) {
         if (isFieldsEmpty()) {
@@ -100,7 +187,8 @@ public class LoginActivity extends AppCompatActivity {
                     SharedPreferences.Editor editor = prefs.edit();
                     editor.putString(getString(R.string.shared_preferences_userid), idEditText.getText().toString());
                     editor.commit();
-                    startActivityForResult(FaceRecognitionActivity.getIntent(this, true), 1);
+                    currentUserId = idEditText.getText().toString();
+                    startActivityForResult(FaceRecognitionActivity.getIntent(this, true), REQUEST_CODE_FACE_RECOGNITION);
                     //startActivityForResult(SecretActivity.getIntent(this,
                     //cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT))), 1);
                 }
@@ -115,6 +203,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void signupButton(View view) {
+        //currentUserId = idEditText.getText().toString();
         if (isFieldsEmpty()) {
             Toast.makeText(this, getString(R.string.toast_loginscreen_emptyfields),
                     Toast.LENGTH_LONG).show();
@@ -143,16 +232,18 @@ public class LoginActivity extends AppCompatActivity {
             cursor.close();
             return;
         }
-        db = dbHelper.getWritableDatabase();
-        ContentValues values = new ContentValues();
-        values.put(AccountContract.Account.COLUMN_NAME_ID, idEditText.getText().toString());
-        values.put(AccountContract.Account.COLUMN_NAME_PASSWORD, passwordEditText.getText().toString());
-        values.put(AccountContract.Account.COLUMN_NAME_CONTENT, "");
-        db.insert(AccountContract.Account.TABLE_NAME, null, values);
-        Toast.makeText(this, getString(R.string.toast_loginscreen_signup_accountcreated),
-                Toast.LENGTH_LONG).show();
         cursor.close();
-        return;
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.CAMERA},
+                    PERMISSIONS_REQUEST_CAMERA
+            );
+        }
+        else {
+            startActivityForResult(FaceRecognitionActivity.getIntent(this, false)
+                    , REQUEST_CODE_FACE_RECOGNITION);
+        }
     }
 
     private boolean isFieldsEmpty() {
