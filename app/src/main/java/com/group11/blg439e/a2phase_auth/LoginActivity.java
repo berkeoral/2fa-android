@@ -55,6 +55,7 @@ public class LoginActivity extends AppCompatActivity {
                         startActivityForResult(FaceRecognitionActivity.getIntent(this, false), REQUEST_CODE_FACE_RECOGNITION);
                     }
                 } else {
+                    verify = true;
                     Toast.makeText(this, getString(R.string.toast_loginscreen_permission_denied),
                             Toast.LENGTH_LONG).show();
                 }
@@ -207,12 +208,18 @@ public class LoginActivity extends AppCompatActivity {
         cursor.close();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
+            verify = false;
             ActivityCompat.requestPermissions(this,
                     new String[]{Manifest.permission.CAMERA},
                     PERMISSIONS_REQUEST_CAMERA
             );
         }
         else {
+            SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(getString(R.string.shared_preferences_userid), idTextInputLayout.getEditText().getText().toString().toLowerCase());
+            editor.commit();
+            currentUserId = idTextInputLayout.getEditText().getText().toString().toLowerCase();
             startActivityForResult(FaceRecognitionActivity.getIntent(this, false)
                     , REQUEST_CODE_FACE_RECOGNITION);
         }
