@@ -44,9 +44,9 @@ public class LoginActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(getString(R.string.shared_preferences_userid), idTextInputLayout.getEditText().getText().toString());
+                    editor.putString(getString(R.string.shared_preferences_userid), idTextInputLayout.getEditText().getText().toString().toLowerCase());
                     editor.commit();
-                    currentUserId = idTextInputLayout.getEditText().getText().toString();
+                    currentUserId = idTextInputLayout.getEditText().getText().toString().toLowerCase();
                     if(verify) {
                         startActivityForResult(FaceRecognitionActivity.getIntent(this, true), REQUEST_CODE_FACE_RECOGNITION);
                     }
@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
                     ContentValues values = new ContentValues();
                     values.put(AccountContract.Account.COLUMN_NAME_ID,
-                            idTextInputLayout.getEditText().getText().toString());
+                            idTextInputLayout.getEditText().getText().toString().toLowerCase());
                     values.put(AccountContract.Account.COLUMN_NAME_PASSWORD,
                             passwordTextInputLayout.getEditText().getText().toString());
                     db.insert(AccountContract.Account.TABLE_NAME, null, values);
@@ -139,7 +139,7 @@ public class LoginActivity extends AppCompatActivity {
                 AccountContract.Account.COLUMN_NAME_PASSWORD
         };
         String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
-        String[] selectionArgs = {idTextInputLayout.getEditText().getText().toString()};
+        String[] selectionArgs = {idTextInputLayout.getEditText().getText().toString().toLowerCase()};
         Cursor cursor = db.query(AccountContract.Account.TABLE_NAME,
                 projection,
                 selection,
@@ -161,9 +161,9 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(getString(R.string.shared_preferences_userid), idTextInputLayout.getEditText().getText().toString());
+                    editor.putString(getString(R.string.shared_preferences_userid), idTextInputLayout.getEditText().getText().toString().toLowerCase());
                     editor.commit();
-                    currentUserId = idTextInputLayout.getEditText().getText().toString();
+                    currentUserId = idTextInputLayout.getEditText().getText().toString().toLowerCase();
                     startActivityForResult(FaceRecognitionActivity.getIntent(this, true), REQUEST_CODE_FACE_RECOGNITION);
                 }
             } else {
@@ -189,7 +189,7 @@ public class LoginActivity extends AppCompatActivity {
                 AccountContract.Account.COLUMN_NAME_PASSWORD
         };
         String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
-        String[] selectionArgs = {idTextInputLayout.getEditText().getText().toString()};
+        String[] selectionArgs = {idTextInputLayout.getEditText().getText().toString().toLowerCase()};
         Cursor cursor = db.query(AccountContract.Account.TABLE_NAME,
                 projection,
                 selection,
