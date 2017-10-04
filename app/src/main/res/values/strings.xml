@@ -1,9 +1,13 @@
 <resources>
-    <string name="app_name">2phase_auth</string>
+    <string name="app_name">Secure Box</string>
+
     <string name="loginscreen_login_button">Login</string>
     <string name="loginscreen_signup_button">Signup</string>
     <string name="loginscreen_id_hint">ID</string>
     <string name="loginscreen_password_hint">Password</string>
+    <string name="secretactivity_message_logedin">Successful login</string>
+    <string name="secretactivity_exit_button">Exit</string>
+    <string name="facerecognition_animation_text">  Uploading..</string>
     <string name="title_activity_secret">SecretActivity</string>
     <string name="toast_loginscreen_signup_idexist">Username already been taken</string>
     <string name="toast_loginscreen_signup_accountcreated">Account created</string>
@@ -20,6 +24,10 @@
     <string name="shared_preferences_filename">prefs</string>
     <string name="shared_preferences_userid">id</string>
     <string name="forresult_intent_responsecode">responsecode</string>
+
+    <!-- For solving a bug in text_input_layout -->
+    <item name="visible" type="id"/>
+    <item name="masked" type="id"/>
 
 
 </resources>

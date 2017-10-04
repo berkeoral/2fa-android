@@ -3,7 +3,6 @@ package com.group11.blg439e.a2phase_auth;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -13,7 +12,6 @@ import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.Toast;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import okhttp3.MediaType;
@@ -88,24 +86,21 @@ public class FaceRecognitionActivity extends AppCompatActivity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
-            try {
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                Bitmap bitmap = BitmapFactory.decodeFile(currentPhotoPath, options);
-                OutputStream fOut = new FileOutputStream(new File(currentPhotoPath));
-                bitmap.compress(Bitmap.CompressFormat.JPEG, PHOTO_COMPRESS_QUALITY, fOut);
-                fOut.close();
-            }
-            catch (Exception e){
-                Log.d("Exception: ", "Failed to compress file");
-            }
+        //User pressed back button
+        if(requestCode == REQUEST_TAKE_PHOTO && resultCode == 0){
+            Intent returnIntent = new Intent();
+            returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                    ,getResources().getInteger(R.integer.facerecog_canceled));
+            setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
+            finish();
+        }
+        else if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
+            compressImage(currentPhotoPath, PHOTO_COMPRESS_QUALITY);
             File file = new File(currentPhotoPath);
             SharedPreferences sharedPreferences = this.getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
             final RequestBody user_id = RequestBody.create(
                     MediaType.parse("text/plain")
                     , sharedPreferences.getString(getString(R.string.shared_preferences_userid), ""));
-            //
             RequestBody reqFile = RequestBody.create(MediaType.parse("image/*"), file);
             MultipartBody.Part body = MultipartBody.Part.createFormData("image", file.getName(), reqFile);
             String app_id = getString(R.string.karios_app_id);
@@ -228,6 +223,20 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
+        }
+    }
+
+    private void compressImage(String absPhotoPath, int compressionRate){
+        try {
+            BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+            Bitmap bitmap = BitmapFactory.decodeFile(absPhotoPath, options);
+            OutputStream fOut = new FileOutputStream(new File(absPhotoPath));
+            bitmap.compress(Bitmap.CompressFormat.JPEG, compressionRate, fOut);
+            fOut.close();
+        }
+        catch (Exception e){
+            Log.d("Exception: ", "Failed to compress file");
         }
     }
 }

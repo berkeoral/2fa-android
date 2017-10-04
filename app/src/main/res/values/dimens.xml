@@ -3,4 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
+    <dimen name="loginscreen_margin_top">50dp</dimen>
+    <dimen name="loginscreen_margin_button_top">10dp</dimen>
+    <dimen name="size_secretactivity_message">20sp</dimen>
 </resources>

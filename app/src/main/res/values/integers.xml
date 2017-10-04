@@ -2,13 +2,13 @@
 <resources>
     <integer name="facerecog_login_verified">10</integer>
     <integer name="facerecog_login_error_notrecog">11</integer>
-    <integer name="facerecog_login_error_connection">-10</integer>
     <integer name="facerecog_login_error_noface">12</integer>
-
+    <integer name="facerecog_login_error_connection">-10</integer>
     <integer name="facerecog_signup_enrolled">20</integer>
     <integer name="facerecog_signup_error_poorquality">21</integer>
     <integer name="facerecog_signup_error_noface">22</integer>
     <integer name="facerecog_signup_error_connection">-20</integer>
+    <integer name="facerecog_canceled">0</integer>
 
     <integer name="facerecog_result_code">1</integer>
     <integer name="secrettext_result_code">2</integer>

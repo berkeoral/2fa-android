@@ -8,34 +8,63 @@
                 android:paddingBottom="@dimen/activity_horizontal_margin"
                 tools:context="com.group11.blg439e.a2phase_auth.LoginActivity">
 
-
     <LinearLayout
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_alignParentStart="true">
-        <EditText
-                android:text="@string/loginscreen_id_hint"
+            android:layout_height="match_parent">
+        <Space android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_weight="0.45">
+        </Space>
+        <LinearLayout
+                android:orientation="vertical"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/loginScreenIdEditText"/>
-        <EditText
-                android:text="@string/loginscreen_password_hint"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/loginScreenPasswordEditText"/>
-        <Button
-                android:text="@string/loginscreen_login_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/loginScreenLoginButton"
-                android:onClick="loginButton"/>
-        <Button
-                android:text="@string/loginscreen_signup_button"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/loginScreenSignupButton"
-                android:onClick="signupButton"/>
+                android:layout_height="match_parent"
+                android:layout_weight="0.1"
+                android:layout_marginTop="@dimen/loginscreen_margin_top">
+            <android.support.design.widget.TextInputLayout
+                    android:id="@+id/facerecognition_textinputlayout_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                <EditText
+                        android:hint="@string/loginscreen_id_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/loginScreenIdEditText"/>
+
+            </android.support.design.widget.TextInputLayout>
+            <android.support.design.widget.TextInputLayout
+                    android:id="@+id/facerecognition_textinputlayout_password"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                <EditText
+                        android:hint="@string/loginscreen_password_hint"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="textPassword"
+                        android:ems="20"
+                        android:id="@+id/loginScreenPasswordEditText"/>
+            </android.support.design.widget.TextInputLayout>
+            <Button
+                    android:text="@string/loginscreen_login_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/loginscreen_margin_button_top"
+                    android:id="@+id/loginScreenLoginButton"
+                    android:onClick="loginButton"
+                    android:backgroundTint="@color/primaryLightColor"/>
+            <Button
+                    android:text="@string/loginscreen_signup_button"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/loginscreen_margin_button_top"
+                    android:id="@+id/loginScreenSignupButton"
+                    android:onClick="signupButton"
+                    android:backgroundTint="@color/primaryLightColor"/>
+        </LinearLayout>
+        <Space android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:layout_weight="0.45">
+        </Space>
     </LinearLayout>
 </RelativeLayout>

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 
 public class SecretActivity extends AppCompatActivity {
 
@@ -18,6 +19,10 @@ public class SecretActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_secret);
+    }
+
+    public void exitButton(View view){
+        finish();
     }
 
 }

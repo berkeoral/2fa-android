@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.fingerprint.FingerprintManager;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -26,18 +27,16 @@ public class LoginActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_SECRET_ACTIVITY = 2;
     private static AccountSQLHelper dbHelper;
     private static Boolean verify = true;
-    private EditText idEditText;
-    private EditText passwordEditText;
+    private TextInputLayout idEditText;
+    private TextInputLayout passwordEditText;
     private String currentUserId;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        idEditText = (EditText) findViewById(R.id.loginScreenIdEditText);
-        passwordEditText = (EditText) findViewById(R.id.loginScreenPasswordEditText);
+        idEditText = (TextInputLayout) findViewById(R.id.facerecognition_textinputlayout_id);
+        passwordEditText = (TextInputLayout) findViewById(R.id.facerecognition_textinputlayout_password);
         dbHelper = new AccountSQLHelper(this);
     }
 
@@ -49,9 +48,9 @@ public class LoginActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(getString(R.string.shared_preferences_userid), idEditText.getText().toString());
+                    editor.putString(getString(R.string.shared_preferences_userid), idEditText.getEditText().getText().toString());
                     editor.commit();
-                    currentUserId = idEditText.getText().toString();
+                    currentUserId = idEditText.getEditText().getText().toString();
                     if(verify) {
                         startActivityForResult(FaceRecognitionActivity.getIntent(this, true), REQUEST_CODE_FACE_RECOGNITION);
                     }
@@ -73,7 +72,10 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == REQUEST_CODE_FACE_RECOGNITION) {
             if (resultCode == getResources().getInteger(R.integer.facerecog_result_code)) {
                 int responsecode = data.getIntExtra(getString(R.string.forresult_intent_responsecode), 0);
-                if(responsecode == getResources().getInteger(R.integer.facerecog_login_verified)){
+                if (responsecode == getResources().getInteger(R.integer.facerecog_canceled)){
+                    currentUserId ="";
+                }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_login_verified)){
                     SQLiteDatabase db = dbHelper.getReadableDatabase();
                     db = LoginActivity.getReadableDB();
                     String[] projection = {
@@ -120,8 +122,8 @@ public class LoginActivity extends AppCompatActivity {
                 else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_enrolled)){
                     SQLiteDatabase db = dbHelper.getWritableDatabase();
                     ContentValues values = new ContentValues();
-                    values.put(AccountContract.Account.COLUMN_NAME_ID, idEditText.getText().toString());
-                    values.put(AccountContract.Account.COLUMN_NAME_PASSWORD, passwordEditText.getText().toString());
+                    values.put(AccountContract.Account.COLUMN_NAME_ID, idEditText.getEditText().getText().toString());
+                    values.put(AccountContract.Account.COLUMN_NAME_PASSWORD, passwordEditText.getEditText().getText().toString());
                     values.put(AccountContract.Account.COLUMN_NAME_CONTENT, "");
                     db.insert(AccountContract.Account.TABLE_NAME, null, values);
                     Toast.makeText(this, getString(R.string.toast_loginscreen_signup_accountcreated),
@@ -163,7 +165,7 @@ public class LoginActivity extends AppCompatActivity {
                 AccountContract.Account.COLUMN_NAME_CONTENT
         };
         String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
-        String[] selectionArgs = {idEditText.getText().toString()};
+        String[] selectionArgs = {idEditText.getEditText().getText().toString()};
         Cursor cursor = db.query(AccountContract.Account.TABLE_NAME,
                 projection,
                 selection,
@@ -174,7 +176,7 @@ public class LoginActivity extends AppCompatActivity {
         );
         if (cursor.moveToNext()) {
             String password = cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_PASSWORD));
-            if (password.equals(passwordEditText.getText().toString())) {
+            if (password.equals(passwordEditText.getEditText().getText().toString())) {
 
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                         != PackageManager.PERMISSION_GRANTED) {
@@ -185,9 +187,9 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(getString(R.string.shared_preferences_userid), idEditText.getText().toString());
+                    editor.putString(getString(R.string.shared_preferences_userid), idEditText.getEditText().getText().toString());
                     editor.commit();
-                    currentUserId = idEditText.getText().toString();
+                    currentUserId = idEditText.getEditText().getText().toString();
                     startActivityForResult(FaceRecognitionActivity.getIntent(this, true), REQUEST_CODE_FACE_RECOGNITION);
                     //startActivityForResult(SecretActivity.getIntent(this,
                     //cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_CONTENT))), 1);
@@ -217,7 +219,7 @@ public class LoginActivity extends AppCompatActivity {
                 AccountContract.Account.COLUMN_NAME_CONTENT
         };
         String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
-        String[] selectionArgs = {idEditText.getText().toString()};
+        String[] selectionArgs = {idEditText.getEditText().getText().toString()};
         Cursor cursor = db.query(AccountContract.Account.TABLE_NAME,
                 projection,
                 selection,
@@ -247,7 +249,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private boolean isFieldsEmpty() {
-        if (idEditText.getText().toString().equals("") || passwordEditText.getText().toString().equals("")) {
+        if (idEditText.getEditText().getText().toString().equals("") || passwordEditText.getEditText().getText().toString().equals("")) {
             return true;
         }
         return false;
