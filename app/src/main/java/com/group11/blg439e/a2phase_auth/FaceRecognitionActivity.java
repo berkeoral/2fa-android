@@ -228,6 +228,10 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                         "com.group11.blg439e.a2phase_auth",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                takePictureIntent.putExtra("android.intent.extra.USE_FRONT_CAMERA", true);
+                takePictureIntent.putExtra("android.intent.extras.CAMERA_FACING", android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT);
+                takePictureIntent.putExtra("android.intent.extras.LENS_FACING_FRONT", 1);
+                takePictureIntent.putExtra("android.intent.extra.USE_FRONT_CAMERA", true);
                 startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
             }
         }
