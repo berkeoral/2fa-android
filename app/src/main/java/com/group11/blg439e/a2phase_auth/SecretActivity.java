@@ -7,12 +7,8 @@ import android.os.Bundle;
 import android.view.View;
 
 public class SecretActivity extends AppCompatActivity {
-
-    private static final String INTENT_CONTENT = "content";
-    public static Intent getIntent(Context context, String content){
-        Intent intent = new Intent(context, SecretActivity.class);
-        intent.putExtra(INTENT_CONTENT, content);
-        return intent;
+    public static Intent getIntent(Context context){
+        return new Intent(context, SecretActivity.class);
     }
 
     @Override

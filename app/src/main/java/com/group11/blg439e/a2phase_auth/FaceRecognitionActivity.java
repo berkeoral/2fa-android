@@ -45,7 +45,6 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     private Retrofit retrofit;
     private Gson gson;
     private KairosService kairosService;
-    private AccountSQLHelper dbHelper;
 
     public static Intent getIntent(Context context, Boolean verify){
         Intent intent = new Intent(context, FaceRecognitionActivity.class);
@@ -194,6 +193,10 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    Copy paste from Android's "Capturing Photos" tutorial
+    Returns empty Image file
+     */
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
@@ -207,6 +210,10 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         return image;
     }
 
+    /*
+    Copy paste from Android's "Capturing Photos" tutorial
+    Takes photo and saves to file
+     */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
@@ -226,6 +233,9 @@ public class FaceRecognitionActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    Compresses image at given file path
+     */
     private void compressImage(String absPhotoPath, int compressionRate){
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();

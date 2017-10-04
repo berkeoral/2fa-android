@@ -12,7 +12,7 @@
     <string name="toast_loginscreen_signup_idexist">Username already been taken</string>
     <string name="toast_loginscreen_signup_accountcreated">Account created</string>
     <string name="toast_loginscreen_emptyfields">Empty Fields</string>
-    <string name="toast_loginscreen_login_error">Username or password is wrong</string>
+    <string name="toast_loginscreen_login_error">Username or password is incorrect</string>
     <string name="toast_loginscreen_permission_denied">Permission denied, Application can\'t reach camera</string>
     <string name="toast_facerecognition_nomatch">Not recognized</string>
     <string name="toast_facerecognition_error_connection">No connection</string>

@@ -8,6 +8,5 @@ public final class AccountContract {
         public static final String TABLE_NAME = "entry";
         public static final String COLUMN_NAME_ID = "id";
         public static final String COLUMN_NAME_PASSWORD = "password";
-        public static final String COLUMN_NAME_CONTENT = "content";
     }
 }
