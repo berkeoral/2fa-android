@@ -12,4 +12,5 @@
 
     <integer name="facerecog_result_code">1</integer>
     <integer name="secrettext_result_code">2</integer>
+
 </resources>
