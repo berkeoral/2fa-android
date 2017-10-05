@@ -49,11 +49,15 @@ public class LoginActivity extends AppCompatActivity {
         passwordTextInputLayout = (TextInputLayout) findViewById(R.id.facerecognition_textinputlayout_password);
         dbHelper = new AccountSQLHelper(this);
         try {
-            getSecretKey(getString(R.string.keystore_key_alias));
+            keyStore = KeyStore.getInstance(ANDROID_KEY_STORE);
+            keyStore.load(null);
+            if(!keyStore.containsAlias(getString(R.string.keystore_key_alias))){
+                getSecretKey(getString(R.string.keystore_key_alias));
+            }
             decryptor = new Decryptor();
             encryptor = new Encryptor();
-        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException |NoSuchProviderException
-                |InvalidAlgorithmParameterException | IOException e){
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException | IOException
+                | InvalidAlgorithmParameterException | NoSuchProviderException e){
             e.printStackTrace();
             finish();
         }

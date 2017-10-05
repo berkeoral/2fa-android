@@ -46,5 +46,4 @@ class Decryptor {
                 , spec);
         return new String(cipher.doFinal(encryptedData), "UTF-8");
     }
-
 }
