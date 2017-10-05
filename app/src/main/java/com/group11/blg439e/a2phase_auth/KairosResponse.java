@@ -2,9 +2,7 @@ package com.group11.blg439e.a2phase_auth;
 
 import java.util.ArrayList;
 
-/**
- * Created by berke on 10/1/2017.
- */
+
 public class KairosResponse
 {
     private String face_id;

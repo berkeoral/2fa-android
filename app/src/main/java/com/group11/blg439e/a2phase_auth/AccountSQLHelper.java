@@ -10,7 +10,8 @@ public class AccountSQLHelper extends SQLiteOpenHelper {
             "CREATE TABLE " + AccountContract.Account.TABLE_NAME + " (" +
                     AccountContract.Account._ID + " INTEGER PRIMARY KEY," +
                     AccountContract.Account.COLUMN_NAME_ID + " TEXT," +
-                    AccountContract.Account.COLUMN_NAME_PASSWORD + " TEXT)";
+                    AccountContract.Account.COLUMN_NAME_PASSWORD + " TEXT," +
+                    AccountContract.Account.COLUMN_NAME_IV + " TEXT)";
 
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + AccountContract.Account.TABLE_NAME;

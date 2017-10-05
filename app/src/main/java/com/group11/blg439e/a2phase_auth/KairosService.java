@@ -5,9 +5,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.http.*;
 
-/**
- * Created by berke on 10/1/2017.
- */
 public interface KairosService {
 
     @Multipart

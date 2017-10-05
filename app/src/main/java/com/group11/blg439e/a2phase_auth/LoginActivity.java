@@ -8,24 +8,38 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Toast;
+
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.security.*;
+import java.security.cert.CertificateException;
 
 public class LoginActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST_CAMERA = 1;
     private static final int REQUEST_CODE_FACE_RECOGNITION = 1;
     private static final int REQUEST_CODE_SECRET_ACTIVITY = 2;
+    private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
     private static AccountSQLHelper dbHelper;
     private static Boolean verify = true;
     private TextInputLayout idTextInputLayout;
     private TextInputLayout passwordTextInputLayout;
     private String currentUserId;
+    private Encryptor encryptor;
+    private Decryptor decryptor;
+    private KeyStore keyStore;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +48,15 @@ public class LoginActivity extends AppCompatActivity {
         idTextInputLayout = (TextInputLayout) findViewById(R.id.facerecognition_textinputlayout_id);
         passwordTextInputLayout = (TextInputLayout) findViewById(R.id.facerecognition_textinputlayout_password);
         dbHelper = new AccountSQLHelper(this);
+        try {
+            getSecretKey(getString(R.string.keystore_key_alias));
+            decryptor = new Decryptor();
+            encryptor = new Encryptor();
+        } catch (CertificateException | NoSuchAlgorithmException | KeyStoreException |NoSuchProviderException
+                |InvalidAlgorithmParameterException | IOException e){
+            e.printStackTrace();
+            finish();
+        }
     }
 
     @Override
@@ -95,15 +118,25 @@ public class LoginActivity extends AppCompatActivity {
                     currentUserId ="";
                 }
                 else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_enrolled)){
-                    SQLiteDatabase db = dbHelper.getWritableDatabase();
-                    ContentValues values = new ContentValues();
-                    values.put(AccountContract.Account.COLUMN_NAME_ID,
-                            idTextInputLayout.getEditText().getText().toString().toLowerCase());
-                    values.put(AccountContract.Account.COLUMN_NAME_PASSWORD,
-                            passwordTextInputLayout.getEditText().getText().toString());
-                    db.insert(AccountContract.Account.TABLE_NAME, null, values);
-                    Toast.makeText(this, getString(R.string.toast_loginscreen_signup_accountcreated),
-                            Toast.LENGTH_LONG).show();
+                    try{
+                        String rawPassword = passwordTextInputLayout.getEditText().getText().toString();
+                        String encryptedPassword = encryptor.encryptText(getString(R.string.keystore_key_alias)
+                                ,rawPassword);
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+                        ContentValues values = new ContentValues();
+                        values.put(AccountContract.Account.COLUMN_NAME_ID
+                                , idTextInputLayout.getEditText().getText().toString().toLowerCase());
+                        values.put(AccountContract.Account.COLUMN_NAME_PASSWORD
+                                , encryptedPassword);
+                        values.put(AccountContract.Account.COLUMN_NAME_IV
+                                , Base64.encodeToString(encryptor.getIv(), Base64.DEFAULT));
+                        db.insert(AccountContract.Account.TABLE_NAME, null, values);
+                        Toast.makeText(this, getString(R.string.toast_loginscreen_signup_accountcreated),
+                                Toast.LENGTH_LONG).show();
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
                 }
                 else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_error_poorquality)){
                     Toast.makeText(this
@@ -137,7 +170,8 @@ public class LoginActivity extends AppCompatActivity {
         String[] projection = {
                 AccountContract.Account._ID,
                 AccountContract.Account.COLUMN_NAME_ID,
-                AccountContract.Account.COLUMN_NAME_PASSWORD
+                AccountContract.Account.COLUMN_NAME_PASSWORD,
+                AccountContract.Account.COLUMN_NAME_IV
         };
         String selection = AccountContract.Account.COLUMN_NAME_ID + " = ?";
         String[] selectionArgs = {idTextInputLayout.getEditText().getText().toString().toLowerCase()};
@@ -150,26 +184,37 @@ public class LoginActivity extends AppCompatActivity {
                 null
         );
         if (cursor.moveToNext()) {
-            String password = cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_PASSWORD));
-            if (password.equals(passwordTextInputLayout.getEditText().getText().toString())) {
-
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                        != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(this,
-                            new String[]{Manifest.permission.CAMERA},
-                            PERMISSIONS_REQUEST_CAMERA
-                    );
+            String encryptedPassword = cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_PASSWORD));
+            String iv = cursor.getString(cursor.getColumnIndex(AccountContract.Account.COLUMN_NAME_IV));
+            try{
+                String password = decryptor.decryptData(getString(R.string.keystore_key_alias)
+                        , encryptedPassword
+                        , Base64.decode(iv, Base64.DEFAULT));
+                if (password.equals(passwordTextInputLayout.getEditText().getText().toString())) {
+                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
+                            != PackageManager.PERMISSION_GRANTED) {
+                        ActivityCompat.requestPermissions(this,
+                                new String[]{Manifest.permission.CAMERA},
+                                PERMISSIONS_REQUEST_CAMERA
+                        );
+                    } else {
+                        SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename)
+                                , Context.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString(getString(R.string.shared_preferences_userid)
+                                , idTextInputLayout.getEditText().getText().toString().toLowerCase());
+                        editor.apply();
+                        currentUserId = idTextInputLayout.getEditText().getText().toString().toLowerCase();
+                        startActivityForResult(FaceRecognitionActivity.getIntent(this, true)
+                                , REQUEST_CODE_FACE_RECOGNITION);
+                    }
                 } else {
-                    SharedPreferences prefs = getSharedPreferences(getString(R.string.shared_preferences_filename), Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = prefs.edit();
-                    editor.putString(getString(R.string.shared_preferences_userid), idTextInputLayout.getEditText().getText().toString().toLowerCase());
-                    editor.commit();
-                    currentUserId = idTextInputLayout.getEditText().getText().toString().toLowerCase();
-                    startActivityForResult(FaceRecognitionActivity.getIntent(this, true), REQUEST_CODE_FACE_RECOGNITION);
+                    Toast.makeText(this, getString(R.string.toast_loginscreen_login_error),
+                            Toast.LENGTH_LONG).show();
                 }
-            } else {
-                Toast.makeText(this, getString(R.string.toast_loginscreen_login_error),
-                        Toast.LENGTH_LONG).show();
+            }
+            catch (Exception e){
+                e.printStackTrace();
             }
         } else {
             Toast.makeText(this, getString(R.string.toast_loginscreen_login_error),
@@ -231,6 +276,21 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         }
         return false;
+    }
+
+    @NonNull
+    private SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
+            NoSuchProviderException, InvalidAlgorithmParameterException {
+        final KeyGenerator keyGenerator = KeyGenerator
+                .getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE);
+
+        keyGenerator.init(new KeyGenParameterSpec.Builder(alias,
+                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_SIGN)
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setUserAuthenticationRequired(false)
+                .build());
+        return keyGenerator.generateKey();
     }
 
 }

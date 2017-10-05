@@ -24,6 +24,7 @@
     <string name="shared_preferences_filename">prefs</string>
     <string name="shared_preferences_userid">id</string>
     <string name="forresult_intent_responsecode">responsecode</string>
+    <string name="keystore_key_alias">passwordkey</string>
 
     <!-- For solving a bug in text_input_layout -->
     <item name="visible" type="id"/>
