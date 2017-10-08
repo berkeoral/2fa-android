@@ -30,7 +30,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private static final int PERMISSIONS_REQUEST_CAMERA = 1;
     private static final int REQUEST_CODE_FACE_RECOGNITION = 1;
-    private static final int REQUEST_CODE_SECRET_ACTIVITY = 2;
+    private static final int REQUEST_CODE_SECRET_ACTIVITY = 1;
     private static final String ANDROID_KEY_STORE = "AndroidKeyStore";
     private static AccountSQLHelper dbHelper;
     private static Boolean verify = true;
@@ -41,6 +41,9 @@ public class LoginActivity extends AppCompatActivity {
     private Decryptor decryptor;
     private KeyStore keyStore;
 
+    /*
+    Initializes input fields, encryption & decryption objects
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +66,10 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    * Handles users permission responses
+    * Depending on where user permission asked function starts login or signup processes
+     */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -91,17 +98,23 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    * FaceRecognitionActivity's result intent contains responseCode specifying servers API call response
+    * > If response code indicates error function toasts error message
+    * > If response code indicates successful face validation function starts SecretActivity
+    * > If response code indicates successful face enrollment function encrypts password and stores credentials in SQL db
+    */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_FACE_RECOGNITION) {
+        if(requestCode == REQUEST_CODE_FACE_RECOGNITION || requestCode == REQUEST_CODE_FACE_RECOGNITION) {
             if (resultCode == getResources().getInteger(R.integer.facerecog_result_code)) {
                 int responsecode = data.getIntExtra(getString(R.string.forresult_intent_responsecode), 0);
                 if (responsecode == getResources().getInteger(R.integer.facerecog_canceled)){
-                    currentUserId ="";
+                        currentUserId ="";
                 }
                 else if(responsecode == getResources().getInteger(R.integer.facerecog_login_verified)){
                     startActivityForResult(SecretActivity
-                            .getIntent(this), 1);
+                            .getIntent(this), REQUEST_CODE_SECRET_ACTIVITY);
                 }
                 else if(responsecode == getResources().getInteger(R.integer.facerecog_login_error_notrecog)){
                     Toast.makeText(this
@@ -152,18 +165,29 @@ public class LoginActivity extends AppCompatActivity {
                             ,getString(R.string.toast_facerecognition_error_noface)
                             ,Toast.LENGTH_LONG).show();
                 }
+                else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_error_toomanyfaces)){
+                    Toast.makeText(this
+                            ,getString(R.string.toast_facerecognition_error_toomanyfaces)
+                            ,Toast.LENGTH_LONG).show();
+                }
                 else if(responsecode == getResources().getInteger(R.integer.facerecog_signup_error_connection)){
                     Toast.makeText(this
                             ,getString(R.string.toast_facerecognition_error_connection)
                             ,Toast.LENGTH_LONG).show();
                 }
             }
-        }
-        else if(requestCode == REQUEST_CODE_SECRET_ACTIVITY){
-            currentUserId ="";
+            else if(resultCode == getResources().getInteger(R.integer.secretactivity_result_code)){
+                currentUserId ="";
+            }
         }
     }
 
+    /*
+    * Checks if given id - password pair exists in database
+    * > If exists checks if application has permission to use camera
+    * >> If application has permission, starts FaceRecognitionActivity with verify true
+    * >> else asks user for permission
+     */
     public void loginButton(View view) {
         if (isFieldsEmpty()) {
             Toast.makeText(this, getString(R.string.toast_loginscreen_emptyfields),
@@ -226,6 +250,12 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    /*
+    * Checks if given id exists in database
+    * > If not exists checks if application has permission to use camera
+    * >> If has permission starts FaceRecognitionActivity with verify false
+    * >> else asks user for permission
+     */
     public void signupButton(View view) {
         if (isFieldsEmpty()) {
             Toast.makeText(this, getString(R.string.toast_loginscreen_emptyfields),
@@ -282,6 +312,10 @@ public class LoginActivity extends AppCompatActivity {
         return false;
     }
 
+    /*
+    * Creates AES secret key for encryption
+    * Secrey key stored in android keystore
+     */
     @NonNull
     private SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidAlgorithmParameterException {

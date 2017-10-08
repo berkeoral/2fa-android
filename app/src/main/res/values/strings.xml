@@ -18,6 +18,7 @@
     <string name="toast_facerecognition_error_connection">No connection</string>
     <string name="toast_facerecognition_error_poorquality">Poor photo quality</string>
     <string name="toast_facerecognition_error_noface">No face detected</string>
+    <string name="toast_facerecognition_error_toomanyfaces">Too many faces</string>
     <string name="karios_app_id">00055402</string>
     <string name="karios_app_key">5dec9d86906c619672f7ce6b264f98fc</string>
     <string name="kairos_url_base">https://api.kairos.com/</string>

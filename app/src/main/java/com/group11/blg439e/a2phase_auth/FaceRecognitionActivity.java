@@ -46,12 +46,19 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     private Gson gson;
     private KairosService kairosService;
 
+    /*
+    Default intent generator for FaceRecognitionActivity
+     */
     public static Intent getIntent(Context context, Boolean verify){
         Intent intent = new Intent(context, FaceRecognitionActivity.class);
         intent.putExtra(INTENT_ACTIVITY_PURPOSE, verify);
         return intent;
     }
 
+    /*
+    Initializes API objects
+    Opens camera for taking picture
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,12 +83,12 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     }
 
     /*
-    *From file path obtains bitmap and compresses it
-    * Makes API call sending compressed image file
-    * >If verify flag is true makes api call for verifying user
-    * >else makes api call for enrolling user
+    * Compresses taken photo
+    * Makes API call sending compressed photo
+    * > If verify flag is true api call is for verifying user
+    * > else makes api call is for enrolling user
     * Returns int code to LoginActivity
-    * >int code represents servers response
+    * > int code represents servers response
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -171,11 +178,20 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                             }
                         }
                         else{
-                            Intent returnIntent = new Intent();
-                            returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
-                                    ,getResources().getInteger(R.integer.facerecog_signup_error_noface));
-                            setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
-                            finish();
+                            if(Integer.parseInt(response.body().getErrors()[0].getErrCode()) == 5010){
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                        ,getResources().getInteger(R.integer.facerecog_signup_error_toomanyfaces));
+                                setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
+                                finish();
+                            }
+                            else {
+                                Intent returnIntent = new Intent();
+                                returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
+                                        , getResources().getInteger(R.integer.facerecog_signup_error_noface));
+                                setResult(getResources().getInteger(R.integer.facerecog_result_code), returnIntent);
+                                finish();
+                            }
                         }
                     }
                     @Override
@@ -194,8 +210,8 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     }
 
     /*
-    Copy paste from Android's "Capturing Photos" tutorial
     Returns empty Image file
+    Copy paste from Android's "Capturing Photos" tutorial
      */
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -211,8 +227,8 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     }
 
     /*
-    Copy paste from Android's "Capturing Photos" tutorial
-    Takes photo and saves to file
+    Opens front camera to take picture
+    Saves taken picture to current file path: currentPhotoPath
      */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
@@ -228,6 +244,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
                         "com.group11.blg439e.a2phase_auth",
                         photoFile);
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                //Different android versions has different intent for openning front camera
                 takePictureIntent.putExtra("android.intent.extra.USE_FRONT_CAMERA", true);
                 takePictureIntent.putExtra("android.intent.extras.CAMERA_FACING", android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT);
                 takePictureIntent.putExtra("android.intent.extras.LENS_FACING_FRONT", 1);

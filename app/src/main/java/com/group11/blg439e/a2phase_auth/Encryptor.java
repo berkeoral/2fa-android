@@ -1,13 +1,13 @@
 /*
-*Modified this code
-*https://gist.github.com/josias1991/3bf4ca59777f7dedcaf41a495d96d984
+* Modified this code
+* https://gist.github.com/josias1991/3bf4ca59777f7dedcaf41a495d96d984
+*
+* Uses 128 bit AES for encryption
+* Unlike original code doesnt create new encryption key for every encryption
+* encryptData returns string instead byte array
  */
 
 package com.group11.blg439e.a2phase_auth;
-
-import android.security.keystore.KeyGenParameterSpec;
-import android.security.keystore.KeyProperties;
-import android.support.annotation.NonNull;
 
 import javax.crypto.*;
 import java.io.IOException;
@@ -45,22 +45,7 @@ class Encryptor {
         iv = cipher.getIV();
         return Base64.encodeToString(cipher.doFinal(textToEncrypt.getBytes("UTF-8")), Base64.DEFAULT);
     }
-/*
-    @NonNull
-    private SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
-            NoSuchProviderException, InvalidAlgorithmParameterException {
-        final KeyGenerator keyGenerator = KeyGenerator
-                .getInstance(KeyProperties.KEY_ALGORITHM_AES, ANDROID_KEY_STORE);
 
-        keyGenerator.init(new KeyGenParameterSpec.Builder(alias,
-                KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT | KeyProperties.PURPOSE_SIGN)
-                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
-                .setUserAuthenticationRequired(false)
-                .build());
-        return keyGenerator.generateKey();
-    }
-*/
     byte[] getIv() {
         return iv;
     }
