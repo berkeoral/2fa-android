@@ -1,7 +1,4 @@
 /*
-* Modified this code
-* https://gist.github.com/josias1991/3bf4ca59777f7dedcaf41a495d96d984
-*
 * Uses 128 bit AES for encryption
 * Unlike original code doesnt create new encryption key for every encryption
 * encryptData returns string instead byte array

@@ -1,9 +1,3 @@
-/*
-* Modified this code
-* https://gist.github.com/josias1991/3bf4ca59777f7dedcaf41a495d96d984
-*
-* decryptData takes string instead byte array
- */
 
 package com.group11.blg439e.a2phase_auth;
 
