@@ -42,8 +42,9 @@ public class LoginActivity extends AppCompatActivity {
     private KeyStore keyStore;
 
     /*
-    Initializes input fields, encryption & decryption objects
-     */
+    * If keystore doenst contains key for alies this indicates applications first launch.
+    * If so creates secret key for encryption
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,8 +69,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /*
     * Handles users permission responses
-    * Depending on where user permission asked function starts login or signup processes
-     */
+    * Depending on where permission asked function starts login or signup processes if permission given
+    */
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -100,9 +101,9 @@ public class LoginActivity extends AppCompatActivity {
 
     /*
     * FaceRecognitionActivity's result intent contains responseCode specifying servers API call response
-    * > If response code indicates error function toasts error message
-    * > If response code indicates successful face validation function starts SecretActivity
-    * > If response code indicates successful face enrollment function encrypts password and stores credentials in SQL db
+    * > If response code indicates error, function toasts error message
+    * > If response code indicates successful face validation, function starts SecretActivity
+    * > If response code indicates successful face enrollment, function encrypts password and stores credentials in SQL db
     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -184,9 +185,9 @@ public class LoginActivity extends AppCompatActivity {
 
     /*
     * Checks if given id - password pair exists in database
-    * > If exists checks if application has permission to use camera
-    * >> If application has permission, starts FaceRecognitionActivity with verify true
-    * >> else asks user for permission
+    * Handles necessary encryption operations
+    * > If exists and application has permission to use camera, starts FaceRecognitionActivity
+    * > If exists and application doesn't have permission to use camera, asks for permission
      */
     public void loginButton(View view) {
         if (isFieldsEmpty()) {
@@ -252,9 +253,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /*
     * Checks if given id exists in database
-    * > If not exists checks if application has permission to use camera
-    * >> If has permission starts FaceRecognitionActivity with verify false
-    * >> else asks user for permission
+    * > If not exists and application has permission to use camera, starts FaceRecognitionActivity
+    * > If not exists and application doesn't have permission to use camera, asks user for permission
      */
     public void signupButton(View view) {
         if (isFieldsEmpty()) {
@@ -314,8 +314,8 @@ public class LoginActivity extends AppCompatActivity {
 
     /*
     * Creates AES secret key for encryption
-    * Secrey key stored in android keystore
-     */
+    * Secret key stored in android keystore
+    */
     @NonNull
     private SecretKey getSecretKey(final String alias) throws NoSuchAlgorithmException,
             NoSuchProviderException, InvalidAlgorithmParameterException {
@@ -330,5 +330,4 @@ public class LoginActivity extends AppCompatActivity {
                 .build());
         return keyGenerator.generateKey();
     }
-
 }

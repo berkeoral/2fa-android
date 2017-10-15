@@ -47,7 +47,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     private KairosService kairosService;
 
     /*
-    Default intent generator for FaceRecognitionActivity
+    * Default intent generator for FaceRecognitionActivity
      */
     public static Intent getIntent(Context context, Boolean verify){
         Intent intent = new Intent(context, FaceRecognitionActivity.class);
@@ -56,9 +56,8 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     }
 
     /*
-    Initializes API objects
-    Opens camera for taking picture
-     */
+    * On start of FaceRecognitionActivity always opens camera for taking picture
+    */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,7 +91,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        //User pressed back button
+        //User pressed back button during photo capture
         if(requestCode == REQUEST_TAKE_PHOTO && resultCode == 0){
             Intent returnIntent = new Intent();
             returnIntent.putExtra(getString(R.string.forresult_intent_responsecode)
@@ -210,8 +209,7 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     }
 
     /*
-    Returns empty Image file
-    Copy paste from Android's "Capturing Photos" tutorial
+    * Returns empty Image file
      */
     private File createImageFile() throws IOException {
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -227,8 +225,8 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     }
 
     /*
-    Opens front camera to take picture
-    Saves taken picture to current file path: currentPhotoPath
+    * Opens front camera to take picture
+    * Saves taken picture to current file path: currentPhotoPath
      */
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE);
@@ -255,8 +253,8 @@ public class FaceRecognitionActivity extends AppCompatActivity {
     }
 
     /*
-    Compresses image at given file path
-     */
+    * Compresses image at given file path
+    */
     private void compressImage(String absPhotoPath, int compressionRate){
         try {
             BitmapFactory.Options options = new BitmapFactory.Options();

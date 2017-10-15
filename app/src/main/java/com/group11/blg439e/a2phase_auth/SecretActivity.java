@@ -7,6 +7,10 @@ import android.os.Bundle;
 import android.view.View;
 
 public class SecretActivity extends AppCompatActivity {
+
+    /*
+    * Default intent generator for SecretActivity
+     */
     public static Intent getIntent(Context context){
         return new Intent(context, SecretActivity.class);
     }
@@ -17,6 +21,9 @@ public class SecretActivity extends AppCompatActivity {
         setContentView(R.layout.activity_secret);
     }
 
+    /*
+    * Returns to LoginActivity
+     */
     public void exitButton(View view){
         finish();
     }
