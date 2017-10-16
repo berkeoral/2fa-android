@@ -1,6 +1,5 @@
 /*
 * Uses 128 bit AES for encryption
-* Unlike original code doesnt create new encryption key for every encryption
 * encryptData returns string instead byte array
  */
 
