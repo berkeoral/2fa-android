@@ -107,7 +107,7 @@ public class LoginActivity extends AppCompatActivity {
     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == REQUEST_CODE_FACE_RECOGNITION || requestCode == REQUEST_CODE_FACE_RECOGNITION) {
+        if(requestCode == REQUEST_CODE_FACE_RECOGNITION) {
             if (resultCode == getResources().getInteger(R.integer.facerecog_result_code)) {
                 int responsecode = data.getIntExtra(getString(R.string.forresult_intent_responsecode), 0);
                 if (responsecode == getResources().getInteger(R.integer.facerecog_canceled)){
