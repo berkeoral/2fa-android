@@ -9,6 +9,6 @@ Passwords are encrypted with 128 bit AES
 
 ## Team Members
 
-Berke Oral
-Sinan Kartal
-Murat Özgön
+* Berke Oral
+* Sinan Kartal
+* Murat Özgön
